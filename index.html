@@ -2,17 +2,17 @@
 <html>
 
 <head>
-    <title>Leaflet to CartoDB - Point Collection Tool Beta</title>
+    <title>Minneapolis Bicycle Wish-Map</title>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
     <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> -->
+    <link rel="stylesheet" type="text/css" href="styles/styles.css">
 </head>
 
 <body>
     <div id="wrapper">
         <div id="header">
-            <h1>Leaflet Data Collection Tool</h1>
+            <h1>Minneapolis Bicycle Wish Map</h1>
         </div>
         <div id="map"></div>
         <div id="controls">
@@ -46,22 +46,16 @@
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script>
         // Create Leaflet map object
-        var map = L.map('map', {
-            center: [42.381899, -71.122499],
-            zoom: 13
+        var bikemap = L.map('map', {
+            center: [44.97, -93.25],
+            zoom: 12
         });
 
         // Add Tile Layer basemap
-        // L.tileLayer('http://a{s}.acetate.geoiq.com/tiles/acetate-hillshading/{z}/{x}/{y}.png', {
-        //   attribution: '&copy;2012 Esri & Stamen, Data from OSM and Natural Earth',
-        //   subdomains: '0123',
-        //   minZoom: 2,
-        //   maxZoom: 18
-        // }).addTo(map);
 
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
+        }).addTo(bikemap);
 
 
         // Add Data from CartoDB using the SQL API
@@ -85,7 +79,7 @@
                         marker.bindPopup('' + feature.properties.description + 'Submitted by ' + feature.properties.name + '');
                         return marker;
                     }
-                }).addTo(map);
+                }).addTo(bikemap);
             });
         };
 
@@ -98,7 +92,7 @@
         var drawControl = new L.Control.Draw({
             draw: {
                 polygon: false,
-                polyline: false,
+                polyline: true,
                 rectangle: false,
                 circle: false
             },
@@ -106,7 +100,7 @@
             remove: false
         });
 
-        // Boolean global variable used to control visiblity
+        // Boolean global variable used to control visibility
         var controlOnMap = false;
         // Create variable for Leaflet.draw features
         var drawnItems = new L.FeatureGroup();
@@ -114,23 +108,23 @@
         // Function to add the draw control to the map to start editing
         function startEdits(){
           if(controlOnMap == true){
-            map.removeControl(drawControl);
+            bikemap.removeControl(drawControl);
             controlOnMap = false;
           }
-          map.addControl(drawControl);
+          bikemap.addControl(drawControl);
           controlOnMap = true;
         }
         // Function to remove the draw control from the map
         function stopEdits(){
-          map.removeControl(drawControl);
+          bikemap.removeControl(drawControl);
           controlOnMap = false;
         }
 
         // Function to run when feature is drawn on map
-        map.on('draw:created', function (e){
+        bikemap.on('draw:created', function (e){
           var layer = e.layer;
           drawnItems.addLayer(layer);
-          map.addLayer(drawnItems);
+          bikemap.addLayer(drawnItems);
           dialog.dialog("open");
         });
 
@@ -149,7 +143,7 @@
           "Add to Database": setData,
           Cancel: function() {
             dialog.dialog("close");
-            map.removeLayer(drawnItems);
+            bikemap.removeLayer(drawnItems);
           }
         },
         close: function() {
@@ -174,7 +168,7 @@
           submitToProxy(pURL);
           console.log("Feature has been submitted to the Proxy");
         });
-        map.removeLayer(drawnItems);
+        bikemap.removeLayer(drawnItems);
         drawnItems = new L.FeatureGroup();
         console.log("drawnItems has been cleared");
         dialog.dialog("close");
